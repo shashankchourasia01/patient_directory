@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
+// ✅ Define Patient type
+interface Patient {
+  id: number;
+  name: string;
+  email: string;
+  address: string;
+  condition: string;
+  age: number;
+  photo_url: string;
+}
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -14,18 +25,14 @@ export async function GET(req: Request) {
 
     const filePath = path.join(process.cwd(), 'data', 'data.json');
     const file = await fs.readFile(filePath, 'utf-8');
-    const all = JSON.parse(file) as any[]; // assume array of patient objects
+    const all: Patient[] = JSON.parse(file);
 
     // Filtering
     const filtered = all.filter((p) => {
-      // search across name, email, address, condition
       if (search) {
-        const hay =
-          ((p.name || '') + ' ' + (p.email || '') + ' ' + (p.address || '') + ' ' + (p.condition || ''))
-            .toLowerCase();
+        const hay = `${p.name ?? ''} ${p.email ?? ''} ${p.address ?? ''} ${p.condition ?? ''}`.toLowerCase();
         if (!hay.includes(search)) return false;
       }
-      // condition filter: support comma separated exact match
       if (conditionParam) {
         const conditions = conditionParam.split(',').map(s => s.trim()).filter(Boolean);
         if (conditions.length > 0) {
@@ -40,14 +47,9 @@ export async function GET(req: Request) {
     const multiplier = sortOrder === 'asc' ? 1 : -1;
     filtered.sort((a, b) => {
       if (sortBy === 'age') {
-        const av = Number(a.age || 0);
-        const bv = Number(b.age || 0);
-        return (av - bv) * multiplier;
+        return ((a.age ?? 0) - (b.age ?? 0)) * multiplier;
       }
-      // default: name (string)
-      const an = (a.name || '').toString();
-      const bn = (b.name || '').toString();
-      return an.localeCompare(bn) * multiplier;
+      return (a.name ?? '').localeCompare(b.name ?? '') * multiplier;
     });
 
     // Pagination

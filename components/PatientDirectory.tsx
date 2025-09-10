@@ -38,8 +38,12 @@ export default function PatientDirectory() {
         else setPatients(prev => (p === 1 ? json.data : prev.concat(json.data)));
         setTotal(json.total);
         setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Unknown error');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Unknown error');
+        }
       } finally {
         setLoading(false);
       }

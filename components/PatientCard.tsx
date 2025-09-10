@@ -1,6 +1,7 @@
 
 'use client';
 import React from 'react';
+import Image from 'next/image';
 import type { Patient } from '../types/patient';
 
 type Props = { patient: Patient };
@@ -27,7 +28,13 @@ export default function PatientCard({ patient }: Props) {
       <div className="p-3 flex items-start gap-3">
         <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-semibold">
           {patient.image ? (
-            <img src={patient.image} alt={patient.name} className="w-12 h-12 rounded-full object-cover" />
+            <Image
+              src={patient.image}
+              alt={patient.name || 'Patient'}
+              width={48}   // ✅ match w-12 (48px)
+              height={48}  // ✅ match h-12 (48px)
+              className="w-12 h-12 rounded-full object-cover"
+            />
           ) : (
             <span>{initials(patient.name)}</span>
           )}
